@@ -1,156 +1,272 @@
-# 📄 Spécifications Fonctionnelles & Techniques – Backend ZKTeco
+# Système de Gestion des Employés et Pointage
 
-## 1. 🎯 Objectif du projet
+## 📋 Table des matières
 
-Le backend permet de gérer les **employés**, **départements** et **logs biométriques** issus d’un dispositif **ZKTeco**.  
-Il fournit une **API RESTful sécurisée** permettant à un frontend ou à d’autres services d’exploiter ces données.
+- [Présentation du Projet](#-présentation-du-projet)
+- [Fonctionnalités](#-fonctionnalités)
+- [Stack Technique](#-stack-technique)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Utilisation](#-utilisation)
+- [API Documentation](#-api-documentation)
+- [Sécurité](#-sécurité)
+- [Frontend Recommandé](#-frontend-recommandé)
+- [Contribution](#-contribution)
+- [Licence](#-licence)
 
----
+## 🌟 Présentation du Projet
 
-## 2. 📌 Spécifications Fonctionnelles
+Ce projet est une API RESTful complète pour la gestion des employés et du système de pointage. Il permet de gérer les employés, les départements, les pointages et générer des rapports. Le système inclut une authentification sécurisée, une gestion des rôles et une intégration avec des dispositifs de pointage biométriques ZKTeco.
 
-### 2.1 Gestion des utilisateurs & authentification
+## 🚀 Fonctionnalités
 
-- **Connexion** via nom/mot de passe avec génération d’un **token JWT**
-- **Gestion des rôles** :
-  - **Admin** : accès complet à toutes les ressources
-  - **User** : accès en lecture seule aux employés, départements et logs
-- **Création, modification et suppression** d’utilisateurs (réservé aux admins)
+### 🔐 Authentification et Autorisation
 
----
+- Inscription et connexion des utilisateurs
+- Gestion des rôles (admin, utilisateur)
+- Jetons JWT pour l'authentification
+- Rafraîchissement des jetons d'accès
+- Réinitialisation de mot de passe sécurisée
+- Protection contre les attaques par force brute
 
-### 2.2 Gestion des employés
+### 👥 Gestion des Employés
 
-- Ajouter un employé avec :
-  - `id` (identifiant unique du ZKTeco)
-  - `name` (nom complet)
-  - `privilege` (niveau d’accès ZKTeco)
-  - `password` (optionnel, s’il existe dans le terminal)
-- Modifier et supprimer un employé
-- Lister tous les employés ou un employé spécifique
-- Association possible à un **département**
+- Création, lecture, mise à jour et suppression des employés
+- Gestion des informations personnelles et professionnelles
+- Association des employés aux départements
+- Historique des modifications
 
----
+### 🏢 Gestion des Départements
 
-### 2.3 Gestion des départements
+- Création et gestion hiérarchique des départements
+- Association des employés aux départements
+- Visualisation de l'organigramme
 
-- Ajouter un département avec :
-  - `id`
-  - `name`
-- Modifier et supprimer un département
-- Lister tous les départements
+### ⏱️ Gestion des Pointages
 
----
+- Enregistrement des entrées/sorties
+- Gestion des pauses
+- Calcul automatique des heures supplémentaires
+- Intégration avec les dispositifs ZKTeco
+- Synchronisation des données biométriques
 
-### 2.4 Gestion des logs biométriques
+### 📊 Rapports et Exports
 
-- Récupération automatique depuis un terminal ZKTeco :
-  - **`biometric_id`** : identifiant de l’utilisateur dans le terminal
-  - **`timestamp`** : date et heure de l’événement
-  - **`status`** : type de pointage (`0 = checkin`, `1 = checkout`)
-  - **`action`** : libellé interprété (`checkin` ou `checkout`)
-- Stockage uniquement des nouveaux logs
-- Consultation des logs filtrés par :
-  - Employé
-  - Plage de dates
-  - Type d’action
+- Rapports de présence et d'absence
+- Statistiques de pointage
+- Export en PDF et Excel
+- Filtres avancés pour l'analyse des données
 
----
+### ⚙️ Administration
 
-### 2.5 Synchronisation avec le terminal ZKTeco
+- Tableau de bord administratif
+- Gestion des utilisateurs et des permissions
+- Journalisation des activités
+- Sauvegarde et restauration des données
 
-- Connexion TCP/IP au terminal via l’IP et le port (`4370` par défaut)
-- Désactivation temporaire du terminal pendant la récupération des données
-- Lecture des utilisateurs et des pointages
-- Réactivation du terminal après la lecture
+## 🛠️ Stack Technique
 
----
+### Backend
 
-## 3. 🛠️ Spécifications Techniques
+- **Framework**: Flask (Python)
+- **Base de données**: PostgreSQL avec SQLAlchemy ORM
+- **Authentification**: JWT (JSON Web Tokens)
+- **Documentation**: Swagger/OpenAPI
+- **Validation des données**: Marshmallow
+- **Tâches asynchrones**: Celery (optionnel)
+- **Cache**: Redis (optionnel)
 
-### 3.1 Environnement
+### Sécurité
 
-- **Langage** : Python 3.10+
-- **Framework** : Flask
-- **ORM** : SQLAlchemy
-- **Base de données** : PostgreSQL
-- **Authentification** : JWT (via Flask-JWT-Extended)
-- **Gestion des migrations** : Alembic / Flask-Migrate
-- **Interopérabilité ZKTeco** : bibliothèque `zk`
+- Protection CSRF
+- Rate Limiting
+- Sécurisation des en-têtes HTTP
+- Validation des entrées
+- Chiffrement des mots de passe (bcrypt)
 
----
+## 🚀 Installation
 
-### 3.2 Modèles de données
+### Prérequis
 
-#### **Employee**
+- Python 3.8+
+- PostgreSQL
+- pip (gestionnaire de paquets Python)
+- virtualenv (recommandé)
 
-| Champ        | Type     | Obligatoire | Description |
-|--------------|----------|-------------|-------------|
-| id           | int      | ✅ | Identifiant unique (correspond à celui du ZKTeco) |
-| name         | string   | ✅ | Nom complet |
-| privilege    | int      | ✅ | Niveau d’accès |
-| password     | string   | ❌ | Mot de passe si défini |
-| department_id| int (FK) | ❌ | Lien vers le département |
+### Étapes d'installation
 
-#### **Department**
+1. **Cloner le dépôt**
 
-| Champ | Type | Obligatoire | Description |
-|-------|------|-------------|-------------|
-| id    | int  | ✅          | Identifiant |
-| name  | str  | ✅          | Nom du département |
+   ```bash
+   git clone [URL_DU_REPO]
+   cd backend
+   ```
 
-#### **Log**
+2. **Créer et activer un environnement virtuel**
 
-| Champ        | Type     | Obligatoire | Description |
-|--------------|----------|-------------|-------------|
-| id           | int      | ✅          | Identifiant |
-| employee_id  | int (FK) | ✅          | Employé concerné |
-| biometric_id | int      | ✅          | ID biométrique du ZKTeco |
-| timestamp    | datetime | ✅          | Date/heure du pointage |
-| action       | string   | ✅          | checkin / checkout |
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Sur Linux/Mac
+   # OU
+   .\venv\Scripts\activate  # Sur Windows
+   ```
 
----
+3. **Installer les dépendances**
 
-## 📦 Installation
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### 1️⃣ Cloner le projet
+4. **Configurer la base de données**
+   - Créer une base de données PostgreSQL
+   - Mettre à jour la configuration dans `config.py`
+
+5. **Initialiser la base de données**
+
+   ```bash
+   python manage.py db init
+   python manage.py db migrate
+   python manage.py db upgrade
+   ```
+
+6. **Lancer l'application**
+
+   ```bash
+   python manage.py run
+   ```
+
+## ⚙️ Configuration
+
+Copiez le fichier `.env.example` vers `.env` et modifiez les variables selon votre environnement :
+
+```env
+FLASK_APP=main.py
+FLASK_ENV=development
+SECRET_KEY=votre_cle_secrete_tres_longue
+DATABASE_URL=postgresql://utilisateur:motdepasse@localhost/nom_de_la_base
+JWT_SECRET_KEY=votre_cle_jwt_secrete
+```
+
+## 🚀 Utilisation
+
+### Démarrer le serveur de développement
 
 ```bash
-git clone <URL_DU_REPO>
-cd backend
+python manage.py run
+```
 
-python3 -m venv envzk311
-source env/bin/activate   # Linux / Mac
-env\Scripts\activate      # Windows
+### Créer un utilisateur administrateur
 
-FLASK_APP=manage.py
-FLASK_ENV=development
-SECRET_KEY=une_chaine_secrete
-DATABASE_URL=postgresql://postgres:12032004@localhost/zkteco_db
-JWT_SECRET_KEY=une_autre_chaine_secrete
+```bash
+python manage.py create_admin --username admin --password votre_mot_de_passe
+```
 
+### Exécuter les tests
 
-psql -U postgres -h localhost
-CREATE DATABASE zkteco_db;
+```bash
+pytest
+```
 
-pip install -r requirements.txt                   #pour installer les dependances
+## 📚 API Documentation
 
-pas necessaire mais utile pour les migration :
+Une documentation interactive de l'API est disponible à l'adresse :
 
-flask db init        # seulement la 1ère fois
-flask db migrate -m "Initial migration"
-flask db upgrade
+```
+http://localhost:5000/api/docs
+```
 
-les end points principaux :
-Méthode Endpoint                 Description             Authentification
-POST /api/auth/login          Connexion utilisateur                  ❌
-POST /api/employees            Ajouter un employé              ✅ Admin
-GET /api/employees            Liste des employés              ✅
-GET /api/employees/<id>   Détails d’un employé              ✅
-PUT /api/employees/<id>   Modifier un employé              ✅ Admin
-DELETE /api/employees/<id>   Supprimer un employé              ✅ Admin
-GET /api/departments  Liste des départements              ✅
-POST /api/logs/fetch         Récupérer les logs du ZKTeco      ✅ Admin
+La documentation inclut :
 
+- Tous les endpoints disponibles
+- Les paramètres attendus
+- Les réponses possibles
+- La possibilité de tester les requêtes directement depuis le navigateur
 
+## 🔒 Sécurité
 
+### Mesures de sécurité implémentées
+
+- Authentification par JWT avec rafraîchissement de token
+- Protection contre les attaques CSRF
+- Rate limiting pour prévenir les attaques par force brute
+- Validation stricte des entrées utilisateur
+- Mots de passe hashés avec bcrypt
+- En-têtes de sécurité HTTP
+- Journalisation des activités sensibles
+
+### Bonnes pratiques recommandées
+
+- Toujours utiliser HTTPS en production
+- Mettre à jour régulièrement les dépendances
+- Ne jamais exposer les clés secrètes
+- Implémenter des sauvegardes régulières
+- Surveiller les journaux d'activité
+
+## 🖥️ Frontend Recommandé
+
+### Interface Utilisateur Recommandée
+
+L'API est conçue pour être utilisée avec une interface utilisateur moderne et réactive. Voici les attentes pour le frontend :
+
+#### Technologies Recommandées
+
+- **Framework**: React.js, Vue.js ou Angular
+- **Gestion d'état**: Redux ou Vuex
+- **UI Components**: Material-UI, Ant Design ou Vuetify
+- **Gestion des formulaires**: Formik ou Vee-Validate
+- **Requêtes HTTP**: Axios
+- **Gestion des dates**: date-fns ou Moment.js
+
+#### Écrans Principaux
+
+1. **Connexion**
+   - Formulaire de connexion
+   - Lien de récupération de mot de passe
+
+2. **Tableau de Bord**
+   - Vue d'ensemble des présences
+   - Statistiques clés
+   - Alertes et notifications
+
+3. **Gestion des Employés**
+   - Liste des employés avec filtres
+   - Formulaire d'ajout/édition
+   - Vue détaillée d'un employé
+
+4. **Pointage**
+   - Interface de pointage
+   - Historique des pointages
+   - Gestion des corrections
+
+5. **Rapports**
+   - Générateur de rapports
+   - Filtres avancés
+   - Export PDF/Excel
+
+#### Considérations UX/UI
+
+- Design responsive pour mobile et desktop
+- Feedback utilisateur immédiat pour les actions
+- Chargement paresseux pour les grandes listes
+- Validation en temps réel des formulaires
+- Messages d'erreur clairs et utiles
+- Thème personnalisable
+- Support du mode sombre/clair
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Voici comment contribuer :
+
+1. Forkez le projet
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`)
+3. Committez vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Poussez vers la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrez une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+---
+
+Développé avec ❤️ par [Votre Nom/Équipe] - 2025
