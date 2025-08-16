@@ -1,9 +1,33 @@
 from io import BytesIO
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
 import pandas as pd
 
+# Vérifier si reportlab est disponible
+try:
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
+
 def generate_pdf_report(employees):
+    """
+    Génère un rapport PDF des employés.
+    
+    Args:
+        employees: Liste des employés à inclure dans le rapport
+        
+    Returns:
+        BytesIO: Flux binaire contenant le PDF généré
+        
+    Raises:
+        ImportError: Si reportlab n'est pas installé
+    """
+    if not REPORTLAB_AVAILABLE:
+        raise ImportError(
+            "La génération de PDF nécessite le module 'reportlab'. "
+            "Veuillez l'installer avec: pip install reportlab"
+        )
+        
     buffer = BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
     p.setFont("Helvetica", 14)

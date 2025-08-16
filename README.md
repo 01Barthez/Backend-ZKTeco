@@ -1,5 +1,53 @@
 # Système de Gestion des Employés et Pointage
 
+[![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-13-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Python](https://img.shields.io/badge/Python-3.9-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+
+## 🐋 Démarrage Rapide avec Docker
+
+### Prérequis
+- Docker et Docker Compose installés
+
+### Instructions
+
+1. **Cloner le dépôt**
+   ```bash
+   git clone [URL_DU_REPO]
+   cd backend
+   ```
+
+2. **Configurer l'environnement**
+   ```bash
+   cp .env.example .env
+   # Modifier les variables si nécessaire dans le fichier .env
+   ```
+
+3. **Démarrer les conteneurs**
+   ```bash
+   docker-compose up --build -d
+   ```
+
+4. **Vérifier les logs**
+   ```bash
+   docker-compose logs -f
+   ```
+
+5. **Accéder à l'application**
+   - API: http://localhost:5000
+   - Documentation Swagger: http://localhost:5000/api/docs
+   - Base de données PostgreSQL: localhost:5432
+   - Redis: localhost:6379
+
+### Commandes utiles
+
+- Arrêter les conteneurs: `docker-compose down`
+- Redémarrer un service: `docker-compose restart [service]`
+- Voir les logs: `docker-compose logs -f [service]`
+- Exécuter une commande dans un conteneur: `docker-compose exec web [commande]`
+
+## 📋 Table des matières
+
 ## 📋 Table des matières
 
 - [Présentation du Projet](#-présentation-du-projet)

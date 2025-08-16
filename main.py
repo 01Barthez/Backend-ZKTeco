@@ -1,10 +1,12 @@
 import traceback
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, url_for
 from flask_cors import CORS
 from config import Config
 from models import db
 from routes import employee_bp, log_bp, report_bp, auth_bp
+from routes.auth_routes import auth_ns  # Import du namespace d'authentification
 from flask_jwt_extended import JWTManager
+from swagger_docs import init_swagger, api
 
 
 def create_app():
@@ -28,10 +30,29 @@ def create_app():
         }), 500
 
     # Enregistrement des Blueprints
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(employee_bp)
-    app.register_blueprint(log_bp)
-    app.register_blueprint(report_bp)
+    app.register_blueprint(auth_bp, url_prefix='/api')
+    app.register_blueprint(employee_bp, url_prefix='/api')
+    app.register_blueprint(log_bp, url_prefix='/api')
+    app.register_blueprint(report_bp, url_prefix='/api')
+    
+    # Initialisation de la documentation Swagger
+    init_swagger(app)
+    
+    # Redirection de la racine vers la documentation
+    @app.route('/')
+    def index():
+        return redirect(url_for('swagger.docs'))
+    
+    # Configuration CORS
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('X-Content-Type-Options', 'nosniff')
+        response.headers.add('X-Frame-Options', 'DENY')
+        response.headers.add('X-XSS-Protection', '1; mode=block')
+        return response
 
     return app
 
